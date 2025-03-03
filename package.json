@@ -1,5 +1,5 @@
 {
-  "name": "ai-agents-for-trading",
+  "name": "ai-agents-for-trading-nodejs",
   "version": "0.1.0",
   "description": "AI-powered agents for automating trading and investment operations",
   "main": "dist/index.js",
@@ -13,7 +13,9 @@
     "init-env": "bash scripts/init-env.sh",
     "tech-analysis": "bash scripts/run-technical-analysis.sh",
     "real-market-analysis": "bash scripts/run-real-market-analysis.sh",
-    "collect-market-data": "bash scripts/collect-alphavantage-data.sh"
+    "collect-market-data": "bash scripts/collect-alphavantage-data.sh",
+    "collect-yahoo-data": "bash scripts/collect-yahoo-data.sh",
+    "compare-providers": "bash scripts/compare-data-providers.sh"
   },
   "keywords": [
     "trading",

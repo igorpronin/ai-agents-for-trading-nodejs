@@ -24,7 +24,7 @@ async function runTechnicalAnalysisExample() {
     });
     
     // Check if Alpha Vantage API key is available
-    if (!alphaVantageProvider.hasValidApiKey()) {
+    if (!alphaVantageProvider.hasValidCredentials()) {
       logger.error('Alpha Vantage API key not found or invalid. Please set ALPHAVANTAGE_API_KEY in your .env file.');
       logger.info('Falling back to sample data...');
       await runWithSampleData();

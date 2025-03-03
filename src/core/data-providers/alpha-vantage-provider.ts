@@ -1,9 +1,7 @@
 import axios from 'axios';
 import dotenv from 'dotenv';
 import { createContextLogger } from '../utils/logger';
-import fs from 'fs';
-import path from 'path';
-import moment from 'moment';
+import { BaseMarketDataProvider, BaseMarketDataProviderOptions, MarketDataPoint } from './base-market-data-provider';
 
 dotenv.config();
 
@@ -12,52 +10,28 @@ const logger = createContextLogger('AlphaVantageProvider');
 /**
  * Configuration options for AlphaVantageProvider
  */
-export interface AlphaVantageProviderOptions {
+export interface AlphaVantageProviderOptions extends BaseMarketDataProviderOptions {
   /** API key for Alpha Vantage (optional, will use env var if not provided) */
   apiKey?: string;
-  /** Whether to store API responses to files */
-  store?: boolean;
-  /** Directory to store API responses (required if store is true) */
-  storageDir?: string;
 }
 
 /**
  * Provider class for fetching data from Alpha Vantage API
  */
-export class AlphaVantageProvider {
+export class AlphaVantageProvider extends BaseMarketDataProvider {
   private apiKey: string;
   private baseUrl: string = 'https://www.alphavantage.co/query';
-  private store: boolean;
-  private storageDir: string | null;
   
   /**
    * Create a new Alpha Vantage provider
    * @param options - Configuration options
    */
   constructor(options: AlphaVantageProviderOptions = {}) {
+    super(options, 'ALPHAVANTAGE');
     this.apiKey = options.apiKey || process.env.ALPHAVANTAGE_API_KEY || '';
-    this.store = options.store || false;
-    this.storageDir = options.storageDir || null;
     
     if (!this.apiKey) {
       logger.warn('No Alpha Vantage API key provided. Set ALPHAVANTAGE_API_KEY in your .env file');
-    }
-    
-    if (this.store && !this.storageDir) {
-      throw new Error('Storage directory (storageDir) must be provided when store is set to true');
-    }
-    
-    // Create storage directory if it doesn't exist
-    if (this.store && this.storageDir) {
-      try {
-        if (!fs.existsSync(this.storageDir)) {
-          fs.mkdirSync(this.storageDir, { recursive: true });
-          logger.info(`Created storage directory: ${this.storageDir}`);
-        }
-      } catch (error) {
-        logger.error(`Failed to create storage directory: ${error instanceof Error ? error.message : String(error)}`);
-        throw new Error(`Failed to create storage directory: ${error instanceof Error ? error.message : String(error)}`);
-      }
     }
   }
   
@@ -65,19 +39,24 @@ export class AlphaVantageProvider {
    * Check if the provider has a valid API key
    * @returns boolean indicating if the API key is available
    */
-  public hasValidApiKey(): boolean {
+  public hasValidCredentials(): boolean {
     return !!this.apiKey && this.apiKey.length > 0 && this.apiKey !== 'your_alphavantage_api_key';
   }
   
   /**
    * Fetch daily time series data for a symbol
    * @param symbol - The stock symbol to fetch data for
-   * @param outputSize - The size of time series data ('compact' or 'full')
+   * @param options - Additional options for the request
    * @returns Formatted market data array
    */
-  public async fetchDailyTimeSeries(symbol: string, outputSize: 'compact' | 'full' = 'compact'): Promise<any[]> {
+  public async fetchDailyTimeSeries(
+    symbol: string, 
+    options?: { outputSize?: 'compact' | 'full' }
+  ): Promise<MarketDataPoint[]> {
+    const outputSize = options?.outputSize || 'compact';
+    
     try {
-      if (!this.hasValidApiKey()) {
+      if (!this.hasValidCredentials()) {
         throw new Error('Valid Alpha Vantage API key is required');
       }
       
@@ -127,7 +106,7 @@ export class AlphaVantageProvider {
       
       // Store response to file if enabled
       if (this.store && this.storageDir) {
-        await this.storeResponseToFile(symbol, outputSize, response.data);
+        await this.storeResponseToFile(symbol, response.data, { outputSize });
       }
       
       const timeSeriesData = response.data['Time Series (Daily)'];
@@ -151,11 +130,15 @@ export class AlphaVantageProvider {
   /**
    * Fetch market data for multiple symbols
    * @param symbols - Array of stock symbols to fetch data for
-   * @param outputSize - The size of time series data ('compact' or 'full')
+   * @param options - Additional options for the request
    * @returns Object with symbols as keys and market data arrays as values
    */
-  public async fetchMultipleSymbols(symbols: string[], outputSize: 'compact' | 'full' = 'compact'): Promise<Record<string, any[]>> {
-    const result: Record<string, any[]> = {};
+  public async fetchMultipleSymbols(
+    symbols: string[], 
+    options?: { outputSize?: 'compact' | 'full' }
+  ): Promise<Record<string, MarketDataPoint[]>> {
+    const outputSize = options?.outputSize || 'compact';
+    const result: Record<string, MarketDataPoint[]> = {};
     const errors: Record<string, string> = {};
     let isRateLimited = false;
     
@@ -171,7 +154,7 @@ export class AlphaVantageProvider {
         }
         
         logger.info(`Fetching data for ${symbol}...`);
-        const data = await this.fetchDailyTimeSeries(symbol, outputSize);
+        const data = await this.fetchDailyTimeSeries(symbol, { outputSize });
         result[symbol] = data;
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
@@ -195,37 +178,6 @@ export class AlphaVantageProvider {
     }
     
     return result;
-  }
-  
-  /**
-   * Store API response to a file
-   * @param symbol - The stock symbol
-   * @param outputSize - The size of time series data
-   * @param data - The API response data
-   */
-  private async storeResponseToFile(symbol: string, outputSize: 'compact' | 'full', data: any): Promise<void> {
-    try {
-      if (!this.storageDir) return;
-      
-      // Create filename with datetime, ticker, and data size
-      const now = moment();
-      const dateTimeStr = now.format('YYYY-MM-DD_HH-mm-ss');
-      
-      const filename = `ALPHAVANTAGE_${dateTimeStr}_${symbol}_${outputSize}.json`;
-      const filePath = path.join(this.storageDir, filename);
-      
-      // Write data to file
-      await fs.promises.writeFile(
-        filePath, 
-        JSON.stringify(data, null, 2), 
-        'utf8'
-      );
-      
-      logger.info(`Stored Alpha Vantage response for ${symbol} to ${filePath}`);
-    } catch (error) {
-      logger.error(`Failed to store response to file: ${error instanceof Error ? error.message : String(error)}`);
-      // Don't throw error here, just log it - we don't want to fail the main operation
-    }
   }
   
   /**

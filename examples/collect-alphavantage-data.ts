@@ -8,6 +8,8 @@ dotenv.config();
 
 const logger = createContextLogger('CollectAlphaVantageData');
 
+const dataDir = path.join(process.cwd(), 'data', 'market-data');
+
 /**
  * Script to collect Alpha Vantage data examples in both full and compact formats
  */
@@ -16,7 +18,7 @@ async function collectAlphaVantageData() {
   
   try {
     // Define storage directory
-    const storageDir = path.join(process.cwd(), 'data', 'market-data');
+    const storageDir = dataDir;
     
     // Create Alpha Vantage provider with storage options
     const alphaVantageProvider = new AlphaVantageProvider({
@@ -25,7 +27,7 @@ async function collectAlphaVantageData() {
     });
     
     // Check if Alpha Vantage API key is available
-    if (!alphaVantageProvider.hasValidApiKey()) {
+    if (!alphaVantageProvider.hasValidCredentials()) {
       logger.error('Alpha Vantage API key not found or invalid. Please set ALPHAVANTAGE_API_KEY in your .env file.');
       logger.error('You can get a free API key from: https://www.alphavantage.co/support/#api-key');
       process.exit(1);
@@ -70,7 +72,7 @@ async function collectData(
   
   try {
     // Fetch data for all symbols
-    const data = await provider.fetchMultipleSymbols(symbols, outputSize);
+    const data = await provider.fetchMultipleSymbols(symbols, { outputSize });
     
     // Log summary of collected data
     let successCount = 0;

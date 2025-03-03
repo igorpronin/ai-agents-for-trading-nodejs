@@ -35,6 +35,7 @@ ai-agents-for-trading-nodejs/
 ├── data/                     # Data storage
 │   ├── raw/                  # Raw data
 │   └── processed/            # Processed data
+|   └── market-data/          # Other market data or data examples
 ├── tests/                    # Test suite
 ├── examples/                 # Example usage scripts
 ├── docs/                     # Documentation
@@ -72,13 +73,31 @@ ai-agents-for-trading-nodejs/
    
    # Collect market data examples from Alpha Vantage (both compact and full datasets)
    npm run collect-market-data
+   
+   # Collect market data examples from Yahoo Finance (with various periods and intervals)
+   npm run collect-yahoo-data
    ```
 
 ## Data providers
 
-#### Alphavantage
+The project supports multiple market data providers:
 
-Get an api-key here: https://www.alphavantage.co/support/#api-key
+#### Alpha Vantage
+
+- Free tier: 5 API calls per minute, 500 calls per day
+- Requires API key: Yes
+- Get an API key here: https://www.alphavantage.co/support/#api-key
+
+#### Yahoo Finance
+
+- Free tier: Unlimited (unofficial API)
+- Requires API key: No
+- No registration required
+
+To compare data from different providers, run:
+```bash
+npm run compare-providers
+```
 
 ## Usage Examples
 
