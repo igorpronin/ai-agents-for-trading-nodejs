@@ -1,0 +1,134 @@
+{
+  "agents": {
+    "sentiment": {
+      "newsSentiment": {
+        "enabled": true,
+        "sources": [
+          "https://newsapi.org/v2/top-headlines?country=us&category=business",
+          "https://newsapi.org/v2/everything?q=finance&language=en"
+        ],
+        "updateInterval": 3600000
+      },
+      "socialSentiment": {
+        "enabled": false,
+        "sources": [
+          "twitter",
+          "reddit"
+        ],
+        "updateInterval": 1800000
+      }
+    },
+    "marketAnalysis": {
+      "technicalAnalysis": {
+        "enabled": true,
+        "symbols": ["AAPL", "MSFT", "GOOGL", "AMZN", "META"],
+        "indicators": ["sma", "ema", "rsi", "macd", "bollinger"],
+        "timeframes": ["1d", "4h", "1h"],
+        "updateInterval": 900000
+      },
+      "fundamentalAnalysis": {
+        "enabled": false,
+        "symbols": ["AAPL", "MSFT", "GOOGL", "AMZN", "META"],
+        "metrics": ["pe", "eps", "revenue", "growth"],
+        "updateInterval": 86400000
+      }
+    },
+    "trading": {
+      "signalGenerator": {
+        "enabled": true,
+        "strategies": ["trend_following", "mean_reversion"],
+        "timeframes": ["1d", "4h"],
+        "updateInterval": 3600000
+      },
+      "orderExecutor": {
+        "enabled": false,
+        "mode": "paper_trading",
+        "riskManagement": {
+          "maxPositionSize": 0.05,
+          "stopLossPercent": 0.02,
+          "takeProfitPercent": 0.05
+        }
+      }
+    },
+    "portfolio": {
+      "portfolioManager": {
+        "enabled": true,
+        "rebalanceInterval": 604800000,
+        "maxAllocation": {
+          "stock": 0.6,
+          "crypto": 0.2,
+          "forex": 0.2
+        }
+      },
+      "riskAnalyzer": {
+        "enabled": true,
+        "metrics": ["var", "sharpe", "sortino", "drawdown"],
+        "updateInterval": 86400000
+      }
+    },
+    "reporting": {
+      "performanceReporter": {
+        "enabled": true,
+        "metrics": ["returns", "drawdown", "volatility", "sharpe"],
+        "timeframes": ["daily", "weekly", "monthly"],
+        "updateInterval": 86400000
+      },
+      "alertGenerator": {
+        "enabled": true,
+        "channels": ["email", "webhook"],
+        "events": ["signal", "order", "threshold"]
+      }
+    }
+  },
+  "dataSources": {
+    "market": {
+      "alphavantage": {
+        "enabled": true,
+        "apiKey": "${ALPHAVANTAGE_API_KEY}"
+      },
+      "iexcloud": {
+        "enabled": false,
+        "apiKey": "${IEXCLOUD_API_KEY}"
+      }
+    },
+    "news": {
+      "newsapi": {
+        "enabled": true,
+        "apiKey": "${NEWS_API_KEY}"
+      },
+      "finnhub": {
+        "enabled": false,
+        "apiKey": "${FINNHUB_API_KEY}"
+      }
+    },
+    "social": {
+      "twitter": {
+        "enabled": false,
+        "apiKey": "${TWITTER_API_KEY}",
+        "apiSecret": "${TWITTER_API_SECRET}"
+      },
+      "reddit": {
+        "enabled": false,
+        "clientId": "${REDDIT_CLIENT_ID}",
+        "clientSecret": "${REDDIT_CLIENT_SECRET}"
+      }
+    }
+  },
+  "logging": {
+    "level": "info",
+    "format": "json",
+    "console": true,
+    "file": true,
+    "maxFiles": 5,
+    "maxSize": "5m"
+  },
+  "server": {
+    "enabled": false,
+    "port": 3000,
+    "host": "localhost",
+    "cors": {
+      "origin": "*",
+      "methods": ["GET", "POST"]
+    }
+  }
+} 
