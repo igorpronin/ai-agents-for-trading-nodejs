@@ -63,6 +63,12 @@ ai-agents-for-trading-nodejs/
    - For technical analysis with real data: `ALPHAVANTAGE_API_KEY` (get from [Alpha Vantage](https://www.alphavantage.co/support/#api-key))
    - For sentiment analysis: `NEWS_API_KEY`
 
+   If you update your `.env.example` file with new variables, you can sync them to your `.env` file:
+   ```bash
+   npm run sync-env
+   ```
+   This will add any missing environment variables from `.env.example` to your `.env` file with empty values.
+
 4. **Run an example**
    ```bash
    # Run technical analysis example with sample data
@@ -97,6 +103,39 @@ The project supports multiple market data providers:
 To compare data from different providers, run:
 ```bash
 npm run compare-providers
+```
+
+## LLM Connectors
+
+The project includes a modular system for connecting to various Large Language Model (LLM) providers:
+
+#### OpenAI (ChatGPT)
+
+- Models: GPT-3.5-Turbo, GPT-4, GPT-4-Turbo, etc.
+- Requires API key: Yes
+- Get an API key here: https://platform.openai.com/api-keys
+
+#### Anthropic (Claude)
+
+- Models: Claude 3 Opus, Claude 3 Sonnet, Claude 3 Haiku, etc.
+- Requires API key: Yes
+- Get an API key here: https://console.anthropic.com/
+
+#### Grok
+
+- Models: Grok-1, Grok-1.5
+- Requires API key: Yes
+- Currently in limited availability
+
+#### DeepSeek
+
+- Models: DeepSeek Chat, DeepSeek Coder, etc.
+- Requires API key: Yes
+- Get an API key from DeepSeek's website
+
+To run the LLM connectors example:
+```bash
+npm run llm-example
 ```
 
 ## Usage Examples
